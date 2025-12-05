@@ -1,3 +1,4 @@
+HEAD
 # 💧 SWAI Dashboard - Smart Water Quality IoT Monitor
 
 A comprehensive Flutter IoT application for real-time water quality monitoring with AI-powered predictions and smart recommendations.
@@ -304,3 +305,6 @@ For questions or issues:
 **Built with**: Flutter, Supabase, Gemini AI, TensorFlow Lite
 
 💧 **Making water quality monitoring intelligent!**
+=======
+# Swai_Dashboard
+>>>>>>> 9a96462c1667c3c71f0ec9cdcc91f8ec6fcd226a
