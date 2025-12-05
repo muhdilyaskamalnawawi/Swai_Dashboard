@@ -3,24 +3,28 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 
 /// Service to call Python ML model for water quality predictions
-/// Uses your trained model at: C:\Users\HP\Documents\smart_wgai\water_model.pkl
+/// Uses improved TensorFlow Lite model with feature scaling
+/// Model path: C:\Users\HP\Documents\SEM 6\fyp\MachineLearning\
 class PythonMLService {
   static const String pythonScriptPath =
-      r'C:\Users\HP\Documents\smart_wgai\predict.py';
+      r'C:\Users\HP\Documents\SEM 6\fyp\MachineLearning\predict_tflite.py';
 
-  /// Get prediction from Python ML model
-  /// Returns prediction string (Good, Moderate, Bad, or error)
+  static const String modelPath =
+      r'C:\Users\HP\Documents\SEM 6\fyp\MachineLearning';
+
+  /// Get prediction from improved TFLite model with confidence
+  /// Returns prediction string (Good, Moderate, Bad, Unknown)
   static Future<String> getPrediction({
     required double ph,
     required double tds,
     required double temp,
   }) async {
     try {
-      // Run Python script with sensor arguments
       final result = await Process.run(
         'python',
         [pythonScriptPath, ph.toString(), tds.toString(), temp.toString()],
         runInShell: true,
+        workingDirectory: modelPath,
       );
 
       if (result.exitCode != 0) {
@@ -43,7 +47,7 @@ class PythonMLService {
     }
   }
 
-  /// Get full prediction result including sensor values
+  /// Get full prediction result with confidence score
   static Future<Map<String, dynamic>> getPredictionFull({
     required double ph,
     required double tds,
@@ -54,17 +58,22 @@ class PythonMLService {
         'python',
         [pythonScriptPath, ph.toString(), tds.toString(), temp.toString()],
         runInShell: true,
+        workingDirectory: modelPath,
       );
 
       if (result.exitCode != 0) {
-        return {'error': result.stderr, 'prediction': 'Error'};
+        return {
+          'error': result.stderr,
+          'prediction': 'Error',
+          'confidence': 0.0
+        };
       }
 
       final Map<String, dynamic> response = jsonDecode(result.stdout);
       return response;
     } catch (e) {
       debugPrint('Failed to get full prediction: $e');
-      return {'error': e.toString(), 'prediction': 'Error'};
+      return {'error': e.toString(), 'prediction': 'Error', 'confidence': 0.0};
     }
   }
 
