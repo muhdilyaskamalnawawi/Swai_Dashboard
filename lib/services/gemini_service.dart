@@ -57,6 +57,7 @@ Optimal Ranges for Red Tilapia:
 - Temperature: 25°C – 30°C
 - pH: 6.5 – 8.5
 - TDS: 100 – 500 ppm
+- TDS under 1490 ppm considered acceptable
 
 Input (Real-Time Data):
 - pH: $ph
@@ -66,7 +67,7 @@ Input (Real-Time Data):
 Instructions:
 Analyze the real-time data against the optimal ranges for pond environments.
 Give a concise single, actionable recommendation for a local farmer.
-Keep the recommendation 1–2 sentences, max 30 words.
+Keep the recommendation 1–2 sentences, max 50 words.
 
 Output Format:
 Analysis: [brief observation of which parameters are OK or need adjustment]

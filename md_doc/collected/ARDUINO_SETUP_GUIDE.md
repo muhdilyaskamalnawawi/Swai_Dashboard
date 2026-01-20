@@ -93,15 +93,23 @@ A0    → GPIO 34 (ESP32) or A1 (Arduino)
    - **WiFi** (built-in for ESP32)
 
 ### Step 4: Configure the Code
-Open `ARDUINO_SENSOR_CODE.ino` and update:
+Open `ARDUINO_SENSOR_CODE_FIXED.ino` and update:
 
 ```cpp
 // Line 24-25: Your WiFi credentials
 const char* ssid = "YOUR_WIFI_SSID";
 const char* password = "YOUR_WIFI_PASSWORD";
 
-// Line 28: Your backend API URL
-const char* serverUrl = "http://YOUR_API_SERVER:1880/api/sensor/reading";
+// Supabase REST endpoint (recommended: send directly to Supabase)
+// Example:
+// const char* supabaseUrl = "https://<YOUR_PROJECT>.supabase.co/rest/v1/sensor_readings";
+// const char* supabaseAnonKey = "<YOUR_ANON_KEY>";
+
+// IMPORTANT:
+// If you previously configured the Arduino to POST to a Python/Flask endpoint like
+//   http://<YOUR_IP>:5000/api/sensor/reading
+// and you are NOT running that server anymore, your data will NOT reach Supabase.
+// Use the direct Supabase configuration in ARDUINO_SENSOR_CODE_FIXED.ino instead.
 ```
 
 ### Step 5: Select Board and Port

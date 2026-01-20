@@ -1,0 +1,3 @@
+Feature columns: ['pH', 'TDS', 'Temperature', 'pH_deviation', 'temp_normalized']
+Number of features: 5
+Classes: ['Bad', 'Good', 'Moderate']

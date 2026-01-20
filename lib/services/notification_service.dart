@@ -7,9 +7,13 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   static bool _initialized = false;
+  static String? _lastAlertDedupeKey;
+  static DateTime? _lastAlertDedupeAt;
+  static String? _lastInfoDedupeKey;
+  static DateTime? _lastInfoDedupeAt;
 
   /// Initialize notifications - call in main() before runApp()
-  static Future<void> initialize() async {
+  static Future<void> initialize({bool requestPermissions = true}) async {
     if (_initialized) return;
 
     // Android initialization
@@ -35,7 +39,9 @@ class NotificationService {
     );
 
     // Request permissions
-    await _requestPermissions();
+    if (requestPermissions) {
+      await _requestPermissions();
+    }
 
     _initialized = true;
     debugPrint('✓ Notifications initialized');
@@ -71,7 +77,18 @@ class NotificationService {
     required String title,
     required String body,
     String? payload,
+    String? dedupeKey,
+    Duration dedupeCooldown = const Duration(minutes: 2),
   }) async {
+    if (dedupeKey != null &&
+        _lastAlertDedupeKey == dedupeKey &&
+        _lastAlertDedupeAt != null &&
+        DateTime.now().difference(_lastAlertDedupeAt!) < dedupeCooldown) {
+      debugPrint(
+          '⏭️ Skipping duplicate alert notification for key: $dedupeKey');
+      return;
+    }
+
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
       'water_alert',
@@ -102,6 +119,11 @@ class NotificationService {
       details,
       payload: payload,
     );
+
+    if (dedupeKey != null) {
+      _lastAlertDedupeKey = dedupeKey;
+      _lastAlertDedupeAt = DateTime.now();
+    }
   }
 
   /// Show info notification
@@ -109,7 +131,17 @@ class NotificationService {
     required String title,
     required String body,
     String? payload,
+    String? dedupeKey,
+    Duration dedupeCooldown = const Duration(minutes: 2),
   }) async {
+    if (dedupeKey != null &&
+        _lastInfoDedupeKey == dedupeKey &&
+        _lastInfoDedupeAt != null &&
+        DateTime.now().difference(_lastInfoDedupeAt!) < dedupeCooldown) {
+      debugPrint('⏭️ Skipping duplicate info notification for key: $dedupeKey');
+      return;
+    }
+
     const AndroidNotificationDetails androidDetails =
         AndroidNotificationDetails(
       'water_info',
@@ -138,6 +170,11 @@ class NotificationService {
       details,
       payload: payload,
     );
+
+    if (dedupeKey != null) {
+      _lastInfoDedupeKey = dedupeKey;
+      _lastInfoDedupeAt = DateTime.now();
+    }
   }
 
   /// Schedule a notification

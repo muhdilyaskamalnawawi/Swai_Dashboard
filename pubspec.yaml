@@ -1,4 +1,4 @@
-name: swai_dashboard
+name: swai_dasboard
 description: Smart WaterGuard (Flutter dashboard for Node-RED data)
 publish_to: "none"
 
@@ -38,15 +38,45 @@ dependencies:
   # Gemini AI
   google_generative_ai: ^0.4.0
 
+  # TensorFlow Lite for mobile ML
+  tflite_flutter: ^0.12.1
+
   # Utilities
   intl: ^0.20.2
   collection: ^1.19.0
   uuid: ^4.0.0
+  shared_preferences: ^2.3.3
+  flutter_dotenv: ^6.0.0
+
+  # Android periodic background tasks
+  workmanager: ^0.9.0+3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+  flutter_native_splash: ^2.4.0
 
 flutter:
   uses-material-design: true
+  assets:
+   - assets/swai_icon.png
+   - assets/swai_inapp.png
+   - assets/2.gif
+   - assets/models/water_model_improved.tflite
+   - .env
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/swai_icon.png"
+  adaptive_icon_background: "#0EA5E9"
+  adaptive_icon_foreground: "assets/swai_icon.png"
+
+flutter_native_splash:
+  color: "#0EA5E9"
+  image: assets/swai_icon.png
+  android: true
+  ios: true
+  web: false

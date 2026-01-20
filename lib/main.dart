@@ -1,22 +1,57 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'config/app_config.dart';
-import 'screens/home_screen.dart';
-import 'services/notification_service.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'screens/splash_screen.dart';
+import 'services/workmanager_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: AppConfig.supabaseUrl,
-    anonKey: AppConfig.supabaseKey,
-  );
+  // Global error handling (helps prevent release-mode force closes on uncaught
+  // Dart exceptions and gives us useful logs).
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('FlutterError: ${details.exceptionAsString()}');
+    if (details.stack != null) {
+      debugPrint('${details.stack}');
+    }
+  };
 
-  // Initialize notifications
-  await NotificationService.initialize();
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('Uncaught zone error: $error');
+    debugPrint('$stack');
+    // Returning true marks the error as handled.
+    return true;
+  };
 
-  runApp(const MyApp());
+  runZonedGuarded(() async {
+    // Load environment variables from .env file
+    try {
+      await dotenv.load(fileName: '.env');
+    } catch (e, st) {
+      debugPrint('dotenv.load failed: $e');
+      debugPrint('$st');
+      // Continue boot; AppConfig has fallbacks for Supabase.
+    }
+
+    // Enable Android background polling via WorkManager (registration happens
+    // during app init based on platform).
+    try {
+      await WorkmanagerService.initialize();
+    } catch (e, st) {
+      // Ignore: WorkManager is Android-only.
+      debugPrint('Workmanager init skipped: $e');
+      debugPrint('$st');
+    }
+
+    // All initialization now happens in SplashScreen
+    runApp(const MyApp());
+  }, (Object error, StackTrace stack) {
+    debugPrint('runZonedGuarded error: $error');
+    debugPrint('$stack');
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -30,10 +65,15 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
+          seedColor: const Color(0xFF0EA5E9),
+        ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF0EA5E9),
+          foregroundColor: Colors.white,
+          elevation: 0,
         ),
       ),
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }
