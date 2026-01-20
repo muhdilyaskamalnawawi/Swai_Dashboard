@@ -4,6 +4,7 @@ class SensorReading {
   final double temp;
   final double tds;
   final String? prediction;
+  final double? confidence;
   final String? recommendation;
   final DateTime timestamp;
   final bool isAlert;
@@ -14,6 +15,7 @@ class SensorReading {
     required this.temp,
     required this.tds,
     this.prediction,
+    this.confidence,
     this.recommendation,
     required this.timestamp,
     this.isAlert = false,
@@ -23,10 +25,11 @@ class SensorReading {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'pH': pH,
+      'ph': pH,
       'temp': temp,
       'tds': tds,
       'prediction': prediction,
+      'confidence': confidence,
       'recommendation': recommendation,
       'timestamp': timestamp.toIso8601String(),
       'is_alert': isAlert,
@@ -35,17 +38,45 @@ class SensorReading {
 
   // Create from JSON (Supabase response)
   factory SensorReading.fromJson(Map<String, dynamic> json) {
+    double asDouble(dynamic value) {
+      if (value == null) return 0.0;
+      if (value is num) return value.toDouble();
+      if (value is String) return double.tryParse(value.trim()) ?? 0.0;
+      return 0.0;
+    }
+
+    final phRaw = json['pH'] ?? json['ph'] ?? json['PH'];
+    final tempRaw = json['temp'] ?? json['temperature'] ?? json['Temp'];
+    final tdsRaw = json['tds'] ??
+        json['TDS'] ??
+        json['tds_value'] ??
+        json['tdsPpm'] ??
+        json['tds_ppm'] ??
+        json['ec'] ??
+        json['EC'] ??
+        json['conductivity'] ??
+        json['Conductivity'];
+
     return SensorReading(
       id: json['id'] ?? '',
-      pH: (json['pH'] ?? json['ph'] ?? 0.0).toDouble(),
-      temp: (json['temp'] ?? json['temperature'] ?? 0.0).toDouble(),
-      tds: (json['tds'] ?? 0.0).toDouble(),
-      prediction: json['prediction'] ?? '',
-      recommendation: json['recommendation'] ?? '',
+      pH: asDouble(phRaw),
+      temp: asDouble(tempRaw),
+      tds: asDouble(tdsRaw),
+      prediction: (json['prediction'] != null &&
+              json['prediction'].toString().trim().isNotEmpty)
+          ? json['prediction']
+          : null,
+      confidence: json['confidence'] != null
+          ? (json['confidence'] as num).toDouble()
+          : null,
+      recommendation: (json['recommendation'] != null &&
+              json['recommendation'].toString().trim().isNotEmpty)
+          ? json['recommendation']
+          : null,
       timestamp: json['timestamp'] != null
           ? DateTime.parse(json['timestamp'])
           : DateTime.now(),
-      isAlert: json['is_alert'] ?? false,
+      isAlert: json['is_alert'] == true, // Only true if explicitly true
     );
   }
 
@@ -56,6 +87,7 @@ class SensorReading {
     double? temp,
     double? tds,
     String? prediction,
+    double? confidence,
     String? recommendation,
     DateTime? timestamp,
     bool? isAlert,
@@ -66,6 +98,7 @@ class SensorReading {
       temp: temp ?? this.temp,
       tds: tds ?? this.tds,
       prediction: prediction ?? this.prediction,
+      confidence: confidence ?? this.confidence,
       recommendation: recommendation ?? this.recommendation,
       timestamp: timestamp ?? this.timestamp,
       isAlert: isAlert ?? this.isAlert,
@@ -74,5 +107,5 @@ class SensorReading {
 
   @override
   String toString() =>
-      'SensorReading(pH: $pH, temp: $temp, tds: $tds, timestamp: $timestamp, isAlert: $isAlert)';
+      'SensorReading(pH: $pH, temp: $temp, tds: $tds, prediction: $prediction, confidence: $confidence, timestamp: $timestamp, isAlert: $isAlert)';
 }
